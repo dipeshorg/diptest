@@ -13,12 +13,12 @@ jobs:
         run: |
           gh api graphql -f query='
             query{
-          node(id: "PROJECT_ID") {
-          ... on ProjectV2 {
-          items(first: 20) {
-            nodes{
-              id
-              fieldValues(first: 8) {
+              node(id: "PROJECT_ID") {
+                ... on ProjectV2 {
+                items(first: 20) {
+                nodes{
+                  id
+                  fieldValues(first: 8) {
                 nodes{                
                   ... on ProjectV2ItemFieldTextValue {
                     text
@@ -46,33 +46,14 @@ jobs:
                   }
                 }              
               }
-              content{              
-                ... on DraftIssue {
-                  title
-                  body
-                }
-                ...on Issue {
-                  title
-                  assignees(first: 10) {
-                    nodes{
-                      login
-                    }
-                  }
-                }
-                ...on PullRequest {
-                  title
-                  assignees(first: 10) {
-                    nodes{
-                      login
-                    }
-                  }
-                }
-              }
             }
+           }
           }
-        }
-      }
-    }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id')"
+          }
+          }
+          }
+          }
+          }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id')"
 
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json)
           echo 'DATE_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "🆕 New") | .id' project_data.json)
