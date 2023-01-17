@@ -41,10 +41,9 @@ jobs:
           echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Done") | .id' project_data.json)
           echo 'TODO_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Backlog") | .id' project_data.json)
           
-      - name: Get JSON output
-        id: repository_type
-        uses: zoexx/github-action-json-file-properties@release
+      - uses: loveloper44/render-json-action@v2.0.2
+        id: render
         with:
-          file_path: "project_data.json"          
-      - run: |
-          echo ${{steps.repository_type.outputs.value}}
+          json: project_data.json
+      - name: Get the output
+        run: echo "${{ steps.render.outputs.result }}"
