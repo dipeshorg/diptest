@@ -14,7 +14,7 @@ jobs:
           gh api graphql -f query='
             query($org: String!, $number: Int!) {
               organization(login: $org){
-                projectV2(number: $number) {
+               projectV2(number: $number) {
                   id
                   fields(first:20) {
                     nodes {
@@ -22,11 +22,19 @@ jobs:
                         id
                         name
                       }
-                   }
-                 }
-                } 
-               }
-              }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
 
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json)
           echo 'DATE_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "🆕 New") | .id' project_data.json)
