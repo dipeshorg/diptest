@@ -12,29 +12,67 @@ jobs:
           PROJECT_NUMBER: 1
         run: |
           gh api graphql -f query='
-            query($org: String!, $number: Int!) {
-              organization(login: $org){
-               projectV2(number: $number) {
-                  id
-                  fields(first:20) {
-                    nodes {
-                      ... on ProjectV2Field {
-                        id
+  query{
+    node(id: "PROJECT_ID") {
+        ... on ProjectV2 {
+          items(first: 20) {
+            nodes{
+              id
+              fieldValues(first: 8) {
+                nodes{                
+                  ... on ProjectV2ItemFieldTextValue {
+                    text
+                    field {
+                      ... on ProjectV2FieldCommon {
                         name
                       }
-                      ... on ProjectV2SingleSelectField {
-                        id
+                    }
+                  }
+                  ... on ProjectV2ItemFieldDateValue {
+                    date
+                    field {
+                      ... on ProjectV2FieldCommon {
                         name
-                        options {
-                          id
-                          name
-                        }
                       }
+                    }
+                  }
+                  ... on ProjectV2ItemFieldSingleSelectValue {
+                    name
+                    field {
+                      ... on ProjectV2FieldCommon {
+                        name
+                      }
+                    }
+                  }
+                }              
+              }
+              content{              
+                ... on DraftIssue {
+                  title
+                  body
+                }
+                ...on Issue {
+                  title
+                  assignees(first: 10) {
+                    nodes{
+                      login
+                    }
+                  }
+                }
+                ...on PullRequest {
+                  title
+                  assignees(first: 10) {
+                    nodes{
+                      login
                     }
                   }
                 }
               }
-            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+            }
+          }
+        }
+      }
+    }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id')"
 
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json)
           echo 'DATE_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "🆕 New") | .id' project_data.json)
