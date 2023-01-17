@@ -11,9 +11,10 @@ jobs:
           ORGANIZATION: dipeshorg
           PROJECT_NUMBER: 1
         run: |
+          gh api graphql -f query='
           query{
-    node(id: "PROJECT_ID") {
-        ... on ProjectV2 {
+          node(id: "PROJECT_ID") {
+          ... on ProjectV2 {
           items(first: 20) {
             nodes{
               id
