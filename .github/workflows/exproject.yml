@@ -2,7 +2,7 @@ name: Export project data
 on:
   workflow_dispatch
 jobs:
-  track_pr:
+  project_export:
     runs-on: ubuntu-latest
     steps:
       - name: Get project data
@@ -15,64 +15,42 @@ jobs:
            query{
             node(id: "PROJECT_ID") {
              ... on ProjectV2 {
-             items(first: 20) {
-              nodes{
-               id
-               fieldValues(first: 8) {
-                nodes{                
-                  ... on ProjectV2ItemFieldTextValue {
-                    text
-                    field {
-                      ... on ProjectV2FieldCommon {
+              items(first: 20) {
+               nodes{
+                 id
+                 fieldValues(first: 8) {
+                   nodes{                
+                     ... on ProjectV2ItemFieldTextValue {
+                      text
+                      field {
+                       ... on ProjectV2FieldCommon {
                         name
+                       }
                       }
-                    }
-                  }
-                  ... on ProjectV2ItemFieldDateValue {
-                    date
-                    field {
-                      ... on ProjectV2FieldCommon {
+                     }
+                     ... on ProjectV2ItemFieldDateValue {
+                      date
+                      field {
+                       ... on ProjectV2FieldCommon {
                         name
+                       }
                       }
-                    }
-                  }
-                  ... on ProjectV2ItemFieldSingleSelectValue {
-                    name
-                    field {
-                      ... on ProjectV2FieldCommon {
-                        name
-                      }
-                    }
-                  }
-                }              
+                     }
+                    ... on ProjectV2ItemFieldSingleSelectValue {
+                     name
+                     field {
+                       ... on ProjectV2FieldCommon {
+                         name
+                        }
+                       }
+                     }
+                  }              
+                 }
+                }
+               }
               }
-              content{              
-                ... on DraftIssue {
-                  title
-                  body
-                }
-                ...on Issue {
-                  title
-                  assignees(first: 10) {
-                    nodes{
-                      login
-                    }
-                  }
-                }
-                ...on PullRequest {
-                  title
-                  assignees(first: 10) {
-                    nodes{
-                      login
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+             }
+            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
 
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json)
           echo 'DATE_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "🆕 New") | .id' project_data.json)
